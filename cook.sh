@@ -36,18 +36,128 @@ clean() {
 
 # Generate documentation
 generate_docs() {
-    if [ -f "generate_docs.sh" ]; then
-        echo "Executing generate_docs.sh..."
-        ./generate_docs.sh
-        # shellcheck disable=SC2181
-        if [ $? -eq 0 ]; then
-            echo "Documentation generation successful."
-        else
-            echo "Documentation generation failed."
+    echo "Generating documentation..."
+
+    # Create the necessary directories if they don't exist
+    mkdir -p docs/functions docs/variables docs/headers
+
+    # Create a main docs.md file for the table of contents
+    docs_md="docs/docs.md"
+    echo "# Documentation Table of Contents" > "$docs_md"
+    echo "" >> "$docs_md"
+
+    # List of C types to ignore
+    ignore_types="char|int|uint8_t|size_t|bool|float|double|long|short|void"
+
+    # Loop through all .h files in the src/headers directory
+    for header_file in src/headers/*.h; do
+        if [[ -f "$header_file" ]]; then
+            # Create a TOC file for the current header file with the suffix _H
+            toc_filename="docs/headers/$(basename "$header_file" .h)_H.md"
+            echo "# Table of Contents for $(basename "$header_file")" > "$toc_filename"
+            echo "" >> "$toc_filename"
+            echo "Original file: [$(basename "$header_file")](./$header_file)" >> "$toc_filename"
+            echo "" >> "$toc_filename"
+
+            # Add the header file name to the main docs.md
+            echo "## Header File: [$(basename "$header_file")](./headers/$(basename "$header_file" .h)_H.md)" >> "$docs_md"
+            echo "### Functions" >> "$docs_md"
+
+            # Process global variables and types
+            gawk -v file="$header_file" -v toc_filename="$toc_filename" -v docs_md="$docs_md" -v ignore_types="$ignore_types" '
+            BEGIN {
+                print "## Global Variables" >> toc_filename
+            }
+            /^extern / {
+                line = $0
+                sub(/^extern /, "", line)
+                sub(/;$/, "", line)
+
+                if (match(line, /([A-Za-z_][A-Za-z0-9_]*)$/, arr)) {
+                    var_name = arr[1]
+                } else {
+                    next
+                }
+
+                sub(/^[^ ]+ +/, "", line)
+                while (match(line, /^([*]+|&)+ */)) {
+                    sub(/^([*]+|&)+ */, "", line)
+                }
+
+                if (var_name ~ /^('"${ignore_types}"')/) {
+                    sub(/^('"${ignore_types}"') +/, "", var_name)
+                }
+
+                getline description
+                while (description ~ /^\/\//) {
+                    print description
+                    getline description
+                }
+
+                var_filename = "docs/variables/" var_name "_variable.md"
+                print "# Global Variable" > var_filename
+                print "" >> var_filename
+                print "## " var_name "" >> var_filename
+                print description >> var_filename
+                print "" >> var_filename
+                print "extern " $0 >> var_filename
+                print "" >> var_filename
+                print "---" >> var_filename
+
+                print "Global Variable: [" var_name "](./variables/" var_name "_variable.md)" >> toc_filename
+                print "Global Variable: [" var_name "](./variables/" var_name "_variable.md)" >> docs_md
+            }' "$header_file"
+
+            # Process functions
+            gawk -v file="$header_file" -v toc_filename="$toc_filename" -v docs_md="$docs_md" '
+            BEGIN {
+                print "## Functions" >> toc_filename
+            }
+            /^void |^bool / {
+                func_signature = $0
+                func_name = $2
+                func_name = gensub(/\(.*$/, "", "g", func_name)
+
+                getline description
+                while (description ~ /^\/\//) {
+                    print description
+                    getline description
+                }
+
+                func_filename = "docs/functions/" func_name "_function.md"
+                print "# Function: " func_signature "" > func_filename
+                print "" >> func_filename
+                print "## Brief Description" >> func_filename
+                print description >> func_filename
+                print "" >> func_filename
+                print "## Parameters" >> func_filename
+
+                gsub(/^.*\(/, "", func_signature)
+                gsub(/\).*/, "", func_signature)
+                n = split(func_signature, params, ",")
+                for (i = 1; i <= n; i++) {
+                    gsub(/^[ ]+|[ ]+$/, "", params[i])
+                    print "- **" params[i] "**" >> func_filename
+                }
+
+                print "" >> func_filename
+                print "## Return Value" >> func_filename
+                print "- **Returns**: true if the filename was loaded successfully, false otherwise." >> func_filename
+                print "" >> func_filename
+                print func_signature >> func_filename
+                print "" >> func_filename
+
+                print "[" func_name "](./functions/" func_name "_function.md)" >> toc_filename
+                print "  - [" func_name "](./functions/" func_name "_function.md)" >> docs_md
+            }' "$header_file"
+
+            echo "" >> "$toc_filename"
+            echo "---" >> "$toc_filename"
+            echo "Documented by the cook." >> "$toc_filename"
         fi
-    else
-        echo "generate_docs.sh not found, skipping documentation generation."
-    fi
+    done
+
+    echo "Documentation generation complete."
 }
 
 # Build the program inside the build directory
