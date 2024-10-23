@@ -1,0 +1,10 @@
+
+[log]
+enabled = true
+log_file="blink.log"
+
+[debug]
+enabled = true
+date=true
+time=true
+
