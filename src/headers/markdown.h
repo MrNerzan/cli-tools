@@ -2,6 +2,11 @@
 #ifndef MARKDOWN_H
 #define MARKDOWN_H
 #include "colors.h"
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define MD_INLINE_CODE_COLOR GREEN_TEXT ///< Color for inline code in markdown.
 #define MD_CODE_BLOCK_COLOR ORANGE_TEXT ///< Color for code blocks in markdown.

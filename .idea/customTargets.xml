@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="c56cc6ac-ffdf-405f-b679-c1374a1cc8e2" name="Build Debug" defaultType="TOOL">
+      <configuration id="921a4f27-cdbf-4b0d-9077-0c24cd1d502d" name="Build Debug" toolchainName="System">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_Build Debug" />
+        </build>
+        <clean type="TOOL">
+          <tool actionId="Tool_External Tools_Clean" />
+        </clean>
+      </configuration>
+    </target>
+    <target id="e715739b-6cba-42d1-9414-6a4bdfd354a1" name="Build Release" defaultType="TOOL">
+      <configuration id="2328863b-89b6-4c1a-874b-ca511a65fdac" name="Build Release" toolchainName="System">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_Build Release" />
+        </build>
+        <clean type="TOOL">
+          <tool actionId="Tool_External Tools_Clean" />
+        </clean>
+      </configuration>
+    </target>
+    <target id="756e9cc6-d37b-47d0-8cb8-9fd43af1799c" name="Cook" defaultType="TOOL">
+      <configuration id="646e4a4a-dde6-4189-9e04-2113a9e209fd" name="Cook" toolchainName="System">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_Build Debug" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>

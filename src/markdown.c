@@ -1,9 +1,5 @@
 // markdown.c
 #include "headers/markdown.h"
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 static void print_inline_code_segment(const char *text, int start, int end);
 static int split_row(const char *line,
@@ -157,11 +153,12 @@ static int split_row(const char *line,
 /// @param line The line containing the header.
 void print_table_header(const char *line) {
   const char *p = line;
-  int is_first_pipe = 1;
+  int is_first_pipe = true;
   while (*p) {
     if (*p == '|') {
       if (is_first_pipe) {
         printf(" ");
+          is_first_pipe = false;
       } else {
         printf("\t");
       }
